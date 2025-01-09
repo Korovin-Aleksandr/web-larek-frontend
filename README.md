@@ -137,10 +137,11 @@ export type TUserData = Pick<IOrder, 'email' | 'telephone' | 'adress'>;
 В полях класса хранятся следующие данные:
 - cards: IProduct[] - массив объектов карточек продуктов
 - preview: string | null - id карточки продукта, выбранной для просмотра в модальной окне
+- getCard(cardId: string): ICard - возвращает карточку продукта по ее id
 - events: IEvents - экземпляр класса `EventEmitter` для инициации событий при изменении данных.
 
 Так же класс предоставляет набор методов для взаимодействия с этими данными.
-- getProductList(): IProduct[] - получение массива карточек продукта с сервера
+<!-- - getProductList(): IProduct[] - получение массива карточек продукта с сервера -->
 - addProductToBasket(product: IProduct): void - добавление продукта в корзину
 
 #### Класс OrderData
@@ -159,8 +160,8 @@ export type TUserData = Pick<IOrder, 'email' | 'telephone' | 'adress'>;
 - events: IEvents - экземпляр класса `EventEmitter` для инициации событий при изменении данных.
 
 Так же класс предоставляет набор методов для взаимодействия с этими данными.
+- setOrderInfo(orderData: IOrder) - сохранение данных о заказе
 - deleteProduct(product: IProduct): void - удаление продукта с корзины
-- countingProducts(shopingList: IProduct[]): number - подсчет кол-ва продуктов в корзине
 - calculationAmountOrder(shopingList: IProduct[]): number - расчет суммы стоимости продуктов в корзине
 - choicePaymentMethod(name: string, label: string): void - выбор способа оплаты
 - addUserAdress(adress: string): void - добавление адресса пользователя для доставки
@@ -260,12 +261,14 @@ export type TUserData = Pick<IOrder, 'email' | 'telephone' | 'adress'>;
 В `index.ts` сначала создаются экземпляры всех необходимых классов, а затем настраивается обработка событий.
 
 *Список всех событий, которые могут генерироваться в системе:*\
+- `order:changed` - обновление данных заказа
+- `productList:changed` - обновление списка продуктов на главной странице
 - `product:add` - выбор продукта добавление его в корзину
 - `basket-item:delete` - удаление продуктов с корзины по отдельности
 - `product:open` - открытие модального окна с карточкой товара
 - `basket:open` - открытие корзины
 - `basket:event` - событие при нажатие кнопки оформить
-- `paymentMethods:select` - выбор способа оплаты
+- `paymentMethod:choice` - выбор способа оплаты
 - `address:input` - внесение данных адреса для доставки
 - `email:input` - внесение данных почты покупателя
 - `telephone:input` - внесение данных телефона пользователя

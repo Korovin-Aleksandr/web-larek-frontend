@@ -19,15 +19,14 @@ export interface IOrder {
 }
 
 export interface IProductsData {
-  cards: IProduct[]
+  cards: IProduct[];
   preview: string | null;
-  getProductList(): IProduct[];
+  getCard(cardId: string): IProduct;
   addProductToBasket(product: IProduct): void;
 }
 
 export interface IOrderData {
   deleteProduct(product: IProduct): void;
-  countingProducts(shopingList: IProduct[]): number;
   calculationAmountOrder(shopingList: IProduct[]): number;
   choicePaymentMethod(name: string, label: string): void;
   addUserAdress(adress: string): void;
@@ -35,8 +34,6 @@ export interface IOrderData {
   addUserTelephone(telephone: string): void;
   checkValidation(data: Record<keyof TUserData, string>): boolean;
 }
-
-export type TBasket = Pick<IOrder, 'id' | 'shopingList' | 'total' | 'amountProduct'>;
 
 export type TPaymentMethods = Pick<IOrder, 'paymentMethods' | 'address'>;
 
