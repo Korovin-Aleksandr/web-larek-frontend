@@ -1,5 +1,7 @@
 import { IEvents } from "./base/events";
 import { IProduct, IProductsData} from "../types/index";
+import { basketItem } from "./common/basketModal";
+import { cloneTemplate } from "../utils/utils";
 
 export class ProductData implements IProductsData {
   protected _cards: IProduct[];

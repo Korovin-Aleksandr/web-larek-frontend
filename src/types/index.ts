@@ -1,3 +1,6 @@
+import { ApiPostMethods } from "../components/base/api";
+import { ApiListResponse } from "../components/base/api";
+
 export interface IProduct {
   id: string;
   description: string;
@@ -38,3 +41,9 @@ export interface IOrderData {
 export type TPaymentMethods = Pick<IOrder, 'paymentMethods' | 'address'>;
 
 export type TUserData = Pick<IOrder, 'email' | 'telephone' | 'address'>;
+
+export interface IApi {
+  baseUrl: string;
+  get(uri: string): Promise<ApiListResponse<IProduct>>;
+  post(uri: string, data: object, method?: ApiPostMethods): Promise<ApiListResponse<IProduct>>;
+}
