@@ -24,11 +24,13 @@ export class ModalContainer <T> extends Component<T> {
 
 	open() {
 		this.container.classList.add("modal_active");
+    document.body.style.overflow = "hidden";
 			document.addEventListener("keyup", this.handleEscUp);
 	}
 	close() {
 		this.container.classList.remove("modal_active");
 		document.removeEventListener("keyup", this.handleEscUp);
+    document.body.style.overflow = "";
     this.modalContent.innerHTML = "";
 	}
 

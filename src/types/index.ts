@@ -3,10 +3,10 @@ import { ApiListResponse } from "../components/base/api";
 
 export interface IProduct {
   id: string;
-  description: string;
-  image: string;
+  description?: string;
+  image?: string;
   title: string;
-  category: string;
+  category?: string;
   price: number;
 }
 
@@ -29,6 +29,7 @@ export interface IProductsData {
 }
 
 export interface IOrderData {
+  addProductToBasket(product: IProduct): void;
   deleteProduct(product: IProduct): void;
   calculationAmountOrder(shopingList: IProduct[]): number;
   choicePaymentMethod(name: string, label: string): void;
@@ -36,6 +37,7 @@ export interface IOrderData {
   addUserEmail(email: string): void;
   addUserTelephone(telephone: string): void;
   checkValidation(data: Record<keyof TUserData, string>): boolean;
+  updateOrderInfo(): void;
 }
 
 export type TPaymentMethods = Pick<IOrder, 'paymentMethods' | 'address'>;

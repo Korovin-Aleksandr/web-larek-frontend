@@ -10,12 +10,17 @@ import { AuctionAPI } from './components/AppApi';
 import { Component } from './components/base/Component';
 import { ModalContainer } from './components/common/modalContainer';
 import { CardPreviewModal } from './components/common/cardPreviewModal';
-import { basket, BasketModal, basketItem } from './components/common/basketModal';
+import { BasketModal, basketItem } from './components/common/basketModal';
+import { OrderData } from './components/orderData';
+import { BasketIcon } from './components/common/basket';
 
 const events = new EventEmitter();
 const productsData = new ProductData(events);
 const api = new AuctionAPI(CDN_URL, API_URL);
 const modal = new ModalContainer(document.querySelector('#modal-container'), events);
+const orderData = new OrderData(events);
+const basketIcon = new BasketIcon(document.querySelector('.header__container'), events);
+
 
 //Темплейты
 const cardListTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
@@ -23,7 +28,7 @@ const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#card-preview');
 const basketModalTemplate = ensureElement<HTMLTemplateElement>('#basket');
 const basketItemTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
 
-const basketButton = document.querySelector('.header__basket');
+const basketModal = new BasketModal(cloneTemplate(basketModalTemplate), events);
 
 events.onAll(({ eventName, data }) => {
   console.log(eventName, data);
@@ -35,9 +40,9 @@ api.getLotList()
     const  cardSection = document.querySelector('.gallery');
 
     products.forEach((product) => {
-      const clonedTemplate = cloneTemplate(cardListTemplate); // Клонируем шаблон
-      const card = new ProductCard(clonedTemplate, events); // Создаём карточку
-      cardSection.append(card.render(product)); // Рендерим карточку с данными
+      const clonedTemplate = cloneTemplate(cardListTemplate); 
+      const card = new ProductCard(clonedTemplate, events); 
+      cardSection.append(card.render(product)); 
     });
   })
   .catch((err) => {
@@ -62,24 +67,46 @@ events.on('product:open', (data: { card: ProductCard}) => {
   
 });
 
-basketButton.addEventListener('click', () =>{
-  events.emit('basket:open')
-})
-const basketModal = new basket(cloneTemplate(basketModalTemplate), events);
-
 events.on('basket:open', () =>{
+  
+  basketModal.renderBasketItems(
+    orderData.shopingList,
+    basketItemTemplate,
+    basketItem 
+  );
   modal.modalContent.append(basketModal.render());
-  modal.open()
+  modal.open();
 })
 
-events.on('product:add', (data: { card: CardPreviewModal}) => {
-  const {prewiew }= data.card;
-  const itemBasket = new basketItem(cloneTemplate(basketItemTemplate), events);
-  itemBasket.prewiew = {
-    title: prewiew.title, 
+events.on('product:add', (data: { card: CardPreviewModal }) => {
+  const { prewiew } = data.card;
+  // Добавляем товар в объект OrderData
+  orderData.addProductToBasket({
+    id: prewiew.id,
+    title: prewiew.title,
     price: prewiew.price,
-    id: prewiew.id
-  }; 
-  basketModal.shopingList.append(itemBasket.render());
-  modal.close(); 
+  });
+
+  
+  modal.close();
+  console.log(orderData);
 });
+
+
+events.on('basket-item:delete', (data: { id: string }) => {
+  const { id } = data;
+  // Удаляем товар из объекта OrderData
+  const productToDelete = orderData.shopingList.find((item) => item.id === id);
+  if (productToDelete) {
+    orderData.deleteProduct(productToDelete);
+  }
+  basketModal.renderBasketItems(
+    orderData.shopingList,
+    basketItemTemplate,
+    basketItem 
+  );
+
+  basketModal.updateBasketInfo();
+  basketIcon.count = orderData.calculationAmountOrder();
+});
+
