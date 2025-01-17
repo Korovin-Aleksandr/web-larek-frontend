@@ -1,3 +1,4 @@
+import { PaymantModal } from './components/common/paymantModal';
 import './scss/styles.scss';
 
 import { IProduct, IOrder, IOrderData, IApi } from './types/index';
@@ -12,7 +13,8 @@ import { ModalContainer } from './components/common/modalContainer';
 import { CardPreviewModal } from './components/common/cardPreviewModal';
 import { BasketModal, basketItem } from './components/common/basketModal';
 import { OrderData } from './components/orderData';
-import { BasketIcon } from './components/common/basket';
+import { BasketIcon } from './components/common/basketIcon';
+import { UserInfoModal } from './components/common/userInfoModel';
 
 const events = new EventEmitter();
 const productsData = new ProductData(events);
@@ -27,8 +29,12 @@ const cardListTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
 const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#card-preview');
 const basketModalTemplate = ensureElement<HTMLTemplateElement>('#basket');
 const basketItemTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
+const paymantTemplate = ensureElement<HTMLTemplateElement>('#order')
+const userInfoTemplate = ensureElement<HTMLTemplateElement>('#contacts')
 
 const basketModal = new BasketModal(cloneTemplate(basketModalTemplate), events);
+const paymantModal = new PaymantModal(cloneTemplate(paymantTemplate), events);
+const userInfoModal = new UserInfoModal(cloneTemplate(userInfoTemplate), events);
 
 events.onAll(({ eventName, data }) => {
   console.log(eventName, data);
@@ -62,9 +68,13 @@ events.on('product:open', (data: { card: ProductCard}) => {
     price: price,
     id: card.id
   };
+
+  const isInBasket = orderData.shopingList.some((item) => item.id === card.id);
+  if (isInBasket) {
+    cardPreview.buttonChange();
+  }
   modal.modalContent.append(cardPreview.render());
   modal.open();
-  
 });
 
 events.on('basket:open', () =>{
@@ -86,8 +96,6 @@ events.on('product:add', (data: { card: CardPreviewModal }) => {
     title: prewiew.title,
     price: prewiew.price,
   });
-
-  
   modal.close();
   console.log(orderData);
 });
@@ -105,8 +113,34 @@ events.on('basket-item:delete', (data: { id: string }) => {
     basketItemTemplate,
     basketItem 
   );
-
-  basketModal.updateBasketInfo();
-  basketIcon.count = orderData.calculationAmountOrder();
 });
 
+events.on('basket:update', (data: { amount: number, total: number}) => {
+  basketIcon.count = data.amount;
+  basketModal.order = data.total;
+});
+
+events.on('paymant:open', () => {
+  modal.close();
+  modal.modalContent.append(paymantModal.render());
+  modal.open()
+})
+
+events.on('payment-address:submit', (data: { address: string; paymentMethod: { name: string; label: string } }) => {
+  const { address, paymentMethod } = data;
+  orderData.addUserAdress(address);
+  orderData.choicePaymentMethod(paymentMethod.name, paymentMethod.label);
+});
+
+events.on('userInfo:open', () => {
+  modal.close();
+  modal.modalContent.append(userInfoModal.render());
+  modal.open()
+})
+
+events.on('order:submit', (data: { email: string, phone: string}) =>{
+  const {email, phone } = data
+  orderData.addUserTelephone(phone);
+  orderData.addUserEmail(email);
+  console.log(orderData);
+})

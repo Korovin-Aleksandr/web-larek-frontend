@@ -14,6 +14,7 @@ export interface IOrder {
   id: string;
   shopingList: IProduct[];
   amountProduct: number;
+  index: number;
   total: number;
   address: string;
   email: string;
@@ -25,7 +26,6 @@ export interface IProductsData {
   cards: IProduct[];
   preview: string | null;
   getCard(cardId: string): IProduct;
-  addProductToBasket(product: IProduct): void;
 }
 
 export interface IOrderData {

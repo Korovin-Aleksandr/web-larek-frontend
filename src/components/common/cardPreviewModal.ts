@@ -46,9 +46,12 @@ export class CardPreviewModal extends Component<ICardPreviewModal>{
         this.imageProduct.src = image;
         this.titleProduct.textContent = title;
         this.categoryProduct.textContent = category;
-        this.priceProduct.textContent = `${price} синапсов`;
+        
         this.idProduct = id;
         console.log("Card ID:", this.idProduct);
+        if (price === null) {
+            this.setText(this.priceProduct, `Бесценно`);
+          } else {this.setText(this.priceProduct, `${price} синапсов`);}
     }
 
     get prewiew() {
@@ -60,5 +63,10 @@ export class CardPreviewModal extends Component<ICardPreviewModal>{
             price: parseFloat(this.priceProduct.textContent?.replace(/\D+/g, '') || '0'),
             id: this.idProduct || ''
         };
+    }
+
+    buttonChange() {
+        this.buttonProduct.textContent = 'Уже в корзине';
+        this.buttonProduct.disabled = true;
     }
 }

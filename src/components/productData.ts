@@ -1,7 +1,5 @@
 import { IEvents } from "./base/events";
 import { IProduct, IProductsData} from "../types/index";
-import { basketItem } from "./common/basketModal";
-import { cloneTemplate } from "../utils/utils";
 
 export class ProductData implements IProductsData {
   protected _cards: IProduct[];
@@ -19,10 +17,6 @@ export class ProductData implements IProductsData {
 
   get cards() {
     return this._cards;
-  }
-
-  addProductToBasket(product: IProduct): void {
-    this.events.emit("product:add", product);
   }
 
   getCard(productId: string) {

@@ -19,10 +19,6 @@ export class BasketIcon extends Component<IBasketIcon> {
     this.buttonBasket.addEventListener('click', () => {
       this.events.emit('basket:open');
     });
-
-    this.events.on('basket:update', (data: { amount: number }) => {
-      this.count = data.amount;
-    });
   }
 
   set count(count: number) {
