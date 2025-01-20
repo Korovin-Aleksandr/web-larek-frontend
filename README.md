@@ -244,6 +244,23 @@ protected buttonProduct: HTMLButtonElement - кнопка для заказа п
 - set и get для записи и получения информиции с полей
 - buttonChange() - изменения текста кнопки
 
+#### Класс BaseModal
+Класс является родительским для класса PaymantModal и UserInfoModal и содержит в себе методы работы с волидацией и ее отображанием
+Поля класса:
+container: HTMLElement - контейнер
+events: IEvents - экземпляр класса `EventEmitter` для инициации событий при изменении данных.
+errorSpan: HTMLElement - елемент, где отображается ошибка валидации
+
+- constructor(templateId: string, events: IEvents) - конструктор принимает HTMLElement и инстант брокера событий
+
+Методы:
+- displayError(message: string) - метод показа ошибки валидации
+- clearError(): void - метод стирает ошибки валидации
+- getInputValues(inputs: NodeListOf<HTMLInputElement>): Record<string, string> - метод получения данных из полей ввода
+- setInputValues(inputs: NodeListOf<HTMLInputElement>, data: Record<string, string>): void - метод записи данных в поля ввода
+- close() - метод очистки данных класса
+
+
 #### Класс PaymantModal
 Класс отображения модального окна с выбором способа оплаты и указания адреса доставки. Класс включает в себя методы валидации и ее отображения.
 
@@ -251,7 +268,6 @@ protected buttonProduct: HTMLButtonElement - кнопка для заказа п
 modalTitle: HTMLElement - заголовок модалки
 inputs: NodeListOf<HTMLInputElement> - поля ввода
 buttons: NodeListOf<HTMLButtonElement> - кнопки выбора способа оплаты
-errorSpan: HTMLElement - елемент, где отображается ошибка валидации
 submitButton: HTMLButtonElement - кнопка перехода к следубщему шагу
 selectedPaymentMethod: { name: string; label: string } - поля для выблора способа оплаты
 events: IEvents - экземпляр класса `EventEmitter` для инициации событий при изменении данных.
@@ -260,11 +276,7 @@ events: IEvents - экземпляр класса `EventEmitter` для иниц
 
 Методы:
 - initialize() - метод отвечает за исходное состояние полей в классе
-- protected getInputValues() - метод получения данных из полей ввода
-- inputValues(data: Record<string, string>) - метод записи данных в поля ввода
 - setActiveButton(activeName: string) - метод управления кнопками выбора способа оплаты
-- displayError(message: string) - метод показа ошибки валидации
-- clearError(): void - метод стирает ошибки валидации
 - toggleSubmitButton(): void - метот управления управления активации кнопки перехода к следующему шану относительно валидации
 - submitOrderData()  - метот отправки данных в объект и перехода к следующему шагу
 - close() - метод очистки данных класса
@@ -275,18 +287,13 @@ events: IEvents - экземпляр класса `EventEmitter` для иниц
 Поля класса:
 inputs: NodeListOf<HTMLInputElement> - поля ввода
 buttonSubmit: HTMLButtonElement - кнопка отправки данных заказа на сервер и перехода к следующему окно в случае успеха
-errorSpan: HTMLElement - елемент, где отображается ошибка валидации
 events: IEvents - экземпляр класса `EventEmitter` для инициации событий при изменении данных.
 
 - constructor(templateId: string, events: IEvents) - конструктор принимает HTMLElement и инстант брокера событий
 
 Методы:
 - initialize() - метод отвечает за исходное состояние полей в классе
-- protected getInputValues() - метод получения данных из полей ввода
-- inputValues(data: Record<string, string>) - метод записи данных в поля ввода
 - setActiveButton(activeName: string) - метод управления кнопками выбора способа оплаты
-- displayError(message: string) - метод показа ошибки валидации
-- clearError(): void - метод стирает ошибки валидации
 - toggleSubmitButton(): void - метот управления управления активации кнопки перехода к следующему шану относительно валидации
 - submitOrderData()  - метот отправки данных в объект и перехода к следующему шагу
 - close() - метод очистки данных класса

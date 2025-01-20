@@ -1,25 +1,20 @@
-import { TUserData } from "../../types";
-import { Component } from "../base/Component";
 import { IEvents } from "../base/events";
+import { BaseModal } from "./baseModal";
 
 
-export class UserInfoModal extends Component<TUserData> {
+export class UserInfoModal extends BaseModal {
   protected inputs: NodeListOf<HTMLInputElement>;
   protected buttonSubmit: HTMLButtonElement;
-  protected errorSpan: HTMLElement;
-  protected events: IEvents;
 
-  constructor(conteiner: HTMLElement, events: IEvents) {
-    super(conteiner)
-    this.events = events;
+  constructor(container: HTMLElement, events: IEvents) {
+    super(container, events);
     this.inputs = this.container.querySelectorAll<HTMLInputElement>('.form__input');
-    this.buttonSubmit = conteiner.querySelector('.button')
-    this.errorSpan = conteiner.querySelector('.form__errors');
+    this.buttonSubmit = container.querySelector('.button');
 
     this.initialize();
   }
 
-  initialize() {
+  initialize(): void {
     this.buttonSubmit.disabled = true;
 
     this.buttonSubmit.addEventListener('click', () => {
@@ -29,12 +24,11 @@ export class UserInfoModal extends Component<TUserData> {
     this.inputs.forEach((input) => {
       input.addEventListener('input', () => this.toggleSubmitButton());
     });
-
   }
 
   toggleSubmitButton(): void {
     this.clearError();
-    const inputValues = this.getInputValues();
+    const inputValues = this.getInputValues(this.inputs);
 
     if (!inputValues.email.trim()) {
       this.displayError('Пожалуйста, введите email');
@@ -51,46 +45,16 @@ export class UserInfoModal extends Component<TUserData> {
     this.buttonSubmit.disabled = false;
   }
 
-  protected getInputValues() {
-		const valuesObject: Record<string, string> = {};
-		this.inputs.forEach((element) => {
-			valuesObject[element.name] = element.value;
-		});
-		return valuesObject;
-	}
+  submitOrderData(): void {
+    const inputValues = this.getInputValues(this.inputs);
+    const { email, phone } = inputValues;
 
-  set inputValues(data: Record<string, string>) {
-		this.inputs.forEach((element) => {
-			element.value = data[element.name];
-		});
-	}
-
-  displayError(message: string): void {
-    if (this.errorSpan) {
-      this.errorSpan.textContent = message;
-    }
+    this.events.emit('order:submit', { email, phone });
   }
 
-  clearError(): void {
-    if (this.errorSpan) {
-      this.errorSpan.textContent = '';
-    }
-  }
-
-  submitOrderData() {
-    const inputValues = this.getInputValues();
-    const email = inputValues.email;
-    const phone = inputValues.phone;
-
-    this.events.emit('order:submit', { email, phone,
+  close(): void {
+    super.close(this.inputs, () => {
+      this.buttonSubmit.disabled = true;
     });
-  }
-
-  close() {
-		this.inputs.forEach((input) => {
-      input.value = '';
-    });
-    this.clearError();
-    this.buttonSubmit.disabled = true;
   }
 }

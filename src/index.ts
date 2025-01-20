@@ -2,9 +2,9 @@ import './scss/styles.scss';
 
 import { ProductData} from './components/productData';
 import { EventEmitter,} from './components/base/events';
-import {ensureElement, cloneTemplate} from "./utils/utils";
+import { ensureElement, cloneTemplate } from "./utils/utils";
 import { API_URL, CDN_URL } from './utils/constants';
-import {ProductCard} from './components/ProductCard';
+import { ProductCard } from './components/ProductCard';
 import { AuctionAPI } from './components/AppApi';
 import { ModalContainer } from './components/common/modalContainer';
 import { CardPreviewModal } from './components/common/cardPreviewModal';
@@ -13,7 +13,8 @@ import { OrderData } from './components/orderData';
 import { BasketIcon } from './components/common/basketIcon';
 import { UserInfoModal } from './components/common/userInfoModel';
 import { SuccessModal } from './components/common/successModal';
-import { PaymantModal } from './components/common/paymantModal';
+import { PaymentModal } from './components/common/paymantModal';
+
 
 const events = new EventEmitter();
 const productsData = new ProductData(events);
@@ -34,14 +35,14 @@ const successTemplate = ensureElement<HTMLTemplateElement>('#success')
 
 
 const basketModal = new BasketModal(cloneTemplate(basketModalTemplate), events);
-const paymantModal = new PaymantModal(cloneTemplate(paymantTemplate), events);
+const paymantModal = new PaymentModal(cloneTemplate(paymantTemplate), events);
 const userInfoModal = new UserInfoModal(cloneTemplate(userInfoTemplate), events);
 const successModal = new SuccessModal(cloneTemplate(successTemplate), events)
 
 events.onAll(({ eventName, data }) => {
   console.log(eventName, data);
 })
-// 
+//получение массива карточек
 api.getLotList()
   .then((products) => {
     productsData.cards = products;
@@ -57,7 +58,7 @@ api.getLotList()
     console.error(err);
   });
 
-
+//открыие карточки продукта
 events.on('product:open', (data: { card: ProductCard}) => {
   const { card } = data;
   const {description, title, image, category, price} = productsData.getCard(card.id);
@@ -79,6 +80,7 @@ events.on('product:open', (data: { card: ProductCard}) => {
   modal.open();
 });
 
+//открытие корзины
 events.on('basket:open', () =>{
   
   basketModal.renderBasketItems(
@@ -90,6 +92,7 @@ events.on('basket:open', () =>{
   modal.open();
 })
 
+//добавление продукта в корзину
 events.on('product:add', (data: { card: CardPreviewModal }) => {
   const { prewiew } = data.card;
   orderData.addProductToBasket({
@@ -100,7 +103,7 @@ events.on('product:add', (data: { card: CardPreviewModal }) => {
   modal.close();
 });
 
-
+//удаление продукта из корзины
 events.on('basket-item:delete', (data: { id: string }) => {
   const { id } = data;
   const productToDelete = orderData.items.find((item) => item.id === id);
@@ -114,30 +117,34 @@ events.on('basket-item:delete', (data: { id: string }) => {
   );
 });
 
+//обновление информации в корзине
 events.on('basket:update', (data: { amount: number, total: number}) => {
   basketIcon.count = data.amount;
   basketModal.order = data.total;
 });
 
+//открытие модального окна выбора способа оплаты и ввода адреса
 events.on('paymant:open', () => {
   modal.close();
   modal.modalContent.append(paymantModal.render());
   modal.open()
 })
 
+//запись адреса и способа оплаты
 events.on('payment-address:submit', (data: { address: string; paymentMethod: { name: string; label: string } }) => {
   const { address, paymentMethod } = data;
   orderData.addUserAdress(address);
   orderData.choicePaymentMethod(paymentMethod.name, paymentMethod.label);
 });
 
-
+//открытие модального окна ввода контактных данных
 events.on('userInfo:open', () => {
   modal.close();
   modal.modalContent.append(userInfoModal.render());
   modal.open()
 })
 
+//запись контактных данных
 events.on('order:submit', (data: { email: string, phone: string}) =>{
   const {email, phone } = data
   orderData.addUserTelephone(phone);
@@ -145,6 +152,7 @@ events.on('order:submit', (data: { email: string, phone: string}) =>{
   events.emit('order:sending');
 })
 
+//отправка заказа на сервер
 events.on('order:sending', async () => {
   try {
     successModal.orderTotal = { total: orderData.total };
@@ -162,6 +170,7 @@ events.on('order:sending', async () => {
   }
 });
 
+//открытие модального окна успеха
 events.on('success-modal:open', () => {
   modal.close();
   modal.modalContent.append(successModal.render());
@@ -169,6 +178,7 @@ events.on('success-modal:open', () => {
   
 })
 
+//закрытие модального окна успеха
 events.on('success-modal:close', () => {
   modal.close();
 })
