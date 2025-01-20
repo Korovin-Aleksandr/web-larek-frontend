@@ -12,14 +12,14 @@ export interface IProduct {
 
 export interface IOrder {
   id: string;
-  shopingList: IProduct[];
+  items: IProduct[];
   amountProduct: number;
   index: number;
   total: number;
   address: string;
   email: string;
-  telephone: string;
-  paymentMethods:  string;
+  phone: string;
+  payment:  string;
 }
 
 export interface IProductsData {
@@ -29,20 +29,25 @@ export interface IProductsData {
 }
 
 export interface IOrderData {
+  setOrderInfo(orderData: IOrder): void;
+  getOrderInfo(): IOrder;
   addProductToBasket(product: IProduct): void;
   deleteProduct(product: IProduct): void;
   calculationAmountOrder(shopingList: IProduct[]): number;
+  calculateTotal(): number;
+  indexCounter(): void;
   choicePaymentMethod(name: string, label: string): void;
   addUserAdress(adress: string): void;
   addUserEmail(email: string): void;
   addUserTelephone(telephone: string): void;
-  checkValidation(data: Record<keyof TUserData, string>): boolean;
   updateOrderInfo(): void;
+  resetOrderData(): void;
+  convertingObject(items: IProduct[]): string[]
 }
 
-export type TPaymentMethods = Pick<IOrder, 'paymentMethods' | 'address'>;
+export type TPaymentMethods = Pick<IOrder, 'payment' | 'address'>;
 
-export type TUserData = Pick<IOrder, 'email' | 'telephone' | 'address'>;
+export type TUserData = Pick<IOrder, 'email' | 'phone' | 'address'>;
 
 export interface IApi {
   baseUrl: string;

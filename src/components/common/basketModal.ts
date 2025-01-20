@@ -1,8 +1,7 @@
-import { IOrder, IProduct } from "../../types";
+import { IOrder} from "../../types";
 import { cloneTemplate } from "../../utils/utils";
 import { Component } from "../base/Component";
 import { IEvents } from "../base/events";
-import { OrderData } from "../orderData";
 import { CardPreviewModal } from "./cardPreviewModal";
 
 
@@ -24,6 +23,7 @@ export class BasketModal extends Component<IOrder> {
     this.buttonModal.addEventListener('click', () => {
       this.events.emit('paymant:open');
     });
+    this.toggleOrderButton(0); 
   }
 
   set order (total: number) {
@@ -34,9 +34,9 @@ export class BasketModal extends Component<IOrder> {
     return parseFloat(this.basketPrice.textContent || '0');
   }
   
-  renderBasketItems( // Рендерим в корзину
-    items: any[],  // Массив элементов 
-    itemTemplate: HTMLTemplateElement, // Шаблон для рендеринга 
+  renderBasketItems( 
+    items: any[],
+    itemTemplate: HTMLTemplateElement,
     componentClass: typeof basketItem,
   ) {
     this.shopingList.innerHTML = '';
@@ -52,6 +52,11 @@ export class BasketModal extends Component<IOrder> {
       }
       this.shopingList.append(itemComponent.render());
     });
+    this.toggleOrderButton(items.length);
+  }
+
+  toggleOrderButton(itemCount: number): void {
+    this.buttonModal.disabled = itemCount === 0;
   }
 
 }

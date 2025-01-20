@@ -3,7 +3,6 @@ import { Component } from "../base/Component";
 import { IEvents } from "../base/events";
 
 
-
 interface ICardPreviewModal {
     prewiew : {
         description: string;
@@ -23,7 +22,7 @@ export class CardPreviewModal extends Component<ICardPreviewModal>{
     protected priceProduct: HTMLElement;
     protected idProduct: string;
     protected events: IEvents;
-    protected buttonProduct?: HTMLButtonElement;
+    protected buttonProduct: HTMLButtonElement;
     constructor(container: HTMLElement, events: IEvents) {
         super(container)
         this.events = events

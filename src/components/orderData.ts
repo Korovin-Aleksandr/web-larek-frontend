@@ -1,46 +1,58 @@
-import validate from 'validate.js';
-import { constraintsUser } from "../utils/constants";
 import { IEvents } from "./base/events";
-import { IProduct, IOrder, IOrderData, TUserData } from "../types/index";
+import { IProduct, IOrder, IOrderData} from "../types/index";
 
 export class OrderData implements IOrderData {
   protected _id: string;
-  shopingList: any[];
+  items: any[];
   amountProduct: number;
   intex: number;
-  protected total: number;
+  total: number;
   protected address: string;
   protected email: string;
-  protected telephone: string;
-  protected paymentMethods:  string;
-  protected events: IEvents;
+  protected phone: string;
+  protected payment:  string;
+  events: IEvents;
 
   constructor(events: IEvents) {
     this.events = events;
-    this.shopingList = [];  // Инициализируем пустой список товаров
-    this.amountProduct = 0; // Изначально товаров нет
+    this.items = [];
+    this.amountProduct = 0;
     this.intex = 0;
-    this.total = 0;         // Изначальная стоимость = 0
+    this.total = 0;         
     this.address = '';
     this.email = '';
-    this.telephone = '';
-    this.paymentMethods = '';
+    this.phone = '';
+    this.payment = '';
   }
 
   setOrderInfo(orderData: IOrder) {
     this._id = orderData.id;
-    this.shopingList = orderData.shopingList || [];
+    this.items = orderData.items || [];
     this.amountProduct = orderData.amountProduct || 0;
     this.intex = orderData.index || 0;
     this.total = orderData.total || 0;
     this.address = orderData.address || '';
     this.email = orderData.email || '';
-    this.telephone = orderData.telephone || '';
-    this.paymentMethods = orderData.paymentMethods || '';
+    this.phone = orderData.phone || '';
+    this.payment = orderData.payment || '';
+  }
+
+  getOrderInfo(): IOrder {  
+    return {
+      id: this._id,
+      items: this.items,
+      amountProduct: this.amountProduct,
+      index: this.intex,
+      total: this.total,
+      address: this.address,
+      email: this.email,
+      phone: this.phone,
+      payment: this.payment,
+    };
   }
 
   addProductToBasket(product: IProduct): void {
-    this.shopingList.push(product);
+    this.items.push(product);
     this.calculationAmountOrder();
     this.indexCounter()
     this.total += product.price;
@@ -52,29 +64,29 @@ export class OrderData implements IOrderData {
   }
 
   deleteProduct(product: IProduct): void {
-    this.shopingList = this.shopingList.filter((item) => item.id !== product.id);
+    this.items = this.items.filter((item) => item.id !== product.id);
     this.calculationAmountOrder();
     this.total = this.calculateTotal();
     this.events.emit('basket:update', { amount: this.amountProduct, total: this.total });;
   };
   
   calculationAmountOrder(): number {
-    this.amountProduct = this.shopingList.length; // Обновляем свойство объекта
+    this.amountProduct = this.items.length;
     return this.amountProduct;
   };
 
   calculateTotal(): number {
-    return this.shopingList.reduce((total, item) => total + item.price, 0);
+    return this.items.reduce((total, item) => total + item.price, 0);
   }
 
   indexCounter(): void {
-    this.shopingList.forEach((item, index) => {
+    this.items.forEach((item, index) => {
     item.index = index + 1;
     });
   }
 
   choicePaymentMethod(name: string, label: string): void {
-    this.paymentMethods = name;
+    this.payment = name;
   };
 
   addUserAdress(address: string): void {
@@ -86,27 +98,39 @@ export class OrderData implements IOrderData {
   };
 
   addUserTelephone(telephone: string): void {
-    this.telephone = telephone;
+    this.phone = telephone;
   };
 
-  checkValidation(data: Record<keyof TUserData, string>): boolean {
-    const isValid = !Boolean(validate(data, constraintsUser));
-    return isValid;
-  };
   updateOrderInfo() {
     const updatedOrderData: IOrder = {
       id: this._id,
-      shopingList: this.shopingList,
+      items: this.items,
       amountProduct: this.amountProduct,
       index: this.intex,
       total: this.total,
       address: this.address,
       email: this.email,
-      telephone: this.telephone,
-      paymentMethods: this.paymentMethods,
+      phone: this.phone,
+      payment: this.payment,
     };
     this.setOrderInfo(updatedOrderData);
   }
 
+  resetOrderData(): void {
+    this._id = '';
+    this.items = [];
+    this.amountProduct = 0;
+    this.intex = 0;
+    this.total = 0;
+    this.address = '';
+    this.email = '';
+    this.phone = '';
+    this.payment = '';
+  }
  
+  convertingObject(items: IProduct[]): string[] {
+    return items
+    .filter(item => item.id !== "b06cde61-912f-4663-9751-09956c0eed67") 
+    .map(item => item.id); 
+  }
 }

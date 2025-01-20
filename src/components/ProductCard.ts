@@ -1,6 +1,5 @@
 import { IProduct } from "../types";
-import { cloneTemplate, ensureElement } from "../utils/utils";
-import { EventEmitter, IEvents } from "./base/events";
+import { IEvents } from "./base/events";
 import { Component } from "./base/Component";
 
 export class ProductCard extends Component<IProduct> {

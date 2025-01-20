@@ -1,8 +1,11 @@
-import { IApi, IProduct, IOrder, TPaymentMethods, TUserData } from './../types/index';
+import { IProduct} from './../types/index';
 import { ApiListResponse, Api } from './base/api';
+import { OrderData } from './orderData';
+
 
 export interface IAuctionAPI {
   getLotList: () => Promise<IProduct[]>;
+  postOrder: (orderData: OrderData) => Promise<OrderData>;
 }
 
 export class AuctionAPI extends Api implements IAuctionAPI {
@@ -13,10 +16,6 @@ export class AuctionAPI extends Api implements IAuctionAPI {
     this.cdn = cdn;
   }
 
-
-  // getLotList(): Promise<IProduct[]> {
-  //   return this.get('/product').then((data: ApiListResponse<IProduct>) => data.items);
-  // }
   getLotList(): Promise<IProduct[]> {
     return this.get('/product').then((data: ApiListResponse<IProduct>) =>
         data.items.map((item) => ({
@@ -24,6 +23,12 @@ export class AuctionAPI extends Api implements IAuctionAPI {
             image: this.cdn + item.image
         }))
     );
-}
-  
+  }
+
+  postOrder(data: OrderData): Promise<OrderData> {
+    return this.post('/order', data)
+      .then((data: any) => {
+        return new OrderData(data.events); 
+      })
+  }
 }

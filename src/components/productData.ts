@@ -12,7 +12,6 @@ export class ProductData implements IProductsData {
 
   set cards(cards: IProduct[]) {
     this._cards = cards;
-    this.events.emit("productList:changed", cards);
   }
 
   get cards() {
