@@ -56,8 +56,4 @@ export abstract class Component<T> {
         return this.container;
     }
 
-//     protected cloneTemplate(template: HTMLTemplateElement): HTMLElement {
-//         const clone = template.content.firstElementChild?.cloneNode(true);
-//         return clone as HTMLElement;
-//     }
 }

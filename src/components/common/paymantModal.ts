@@ -1,97 +1,98 @@
 import { IEvents } from '../base/events';
-import { BaseModal } from './baseModal';
+import { BaseForm } from './baseForm';
 
+export class PaymentModal extends BaseForm {
+	protected modalTitle: HTMLElement;
+	protected inputs: NodeListOf<HTMLInputElement>;
+	protected buttons: NodeListOf<HTMLButtonElement>;
+	protected submitButton: HTMLButtonElement;
+	selectedPaymentMethod: { name: string; label: string };
 
+	constructor(container: HTMLElement, events: IEvents) {
+		super(container, events);
+		this.modalTitle = container.querySelector('.modal__title');
+		this.inputs =
+			this.container.querySelectorAll<HTMLInputElement>('.form__input');
+		this.buttons =
+			this.container.querySelectorAll<HTMLButtonElement>('.button_alt');
+		this.submitButton = container.querySelector('.order__button');
+		this.selectedPaymentMethod = null;
+		this.initialize();
+	}
 
-export class PaymentModal extends BaseModal{
-  protected modalTitle: HTMLElement;
-  protected inputs: NodeListOf<HTMLInputElement>;
-  protected buttons: NodeListOf<HTMLButtonElement>;
-  protected submitButton: HTMLButtonElement;
-  selectedPaymentMethod: { name: string; label: string };
+	initialize(): void {
+		this.submitButton.disabled = true;
 
-  constructor(container: HTMLElement, events: IEvents) {
-    super(container, events);
-    this.modalTitle = container.querySelector('.modal__title');
-    this.inputs = this.container.querySelectorAll<HTMLInputElement>('.form__input');
-    this.buttons = this.container.querySelectorAll<HTMLButtonElement>('.button_alt');
-    this.submitButton = container.querySelector('.order__button');
-    this.selectedPaymentMethod = null;
+		// Навешиваем обработчик на форму
+		this.container.addEventListener('submit', (evt) => {
+			evt.preventDefault();
+			this.submitOrderData();
+		});
 
-    this.initialize();
-  }
+		this.inputs.forEach((input) => {
+			input.addEventListener('input', () => this.toggleSubmitButton());
+		});
 
-  initialize(): void {
-    this.submitButton.disabled = true;
+		this.buttons.forEach((button) => {
+			button.addEventListener('click', (event) => {
+				const paymentMethod = (event.target as HTMLButtonElement).name;
+				const paymentLabel = button.textContent || '';
+				this.selectedPaymentMethod = {
+					name: paymentMethod,
+					label: paymentLabel,
+				};
+				this.setActiveButton(paymentMethod);
+				this.toggleSubmitButton();
+			});
+		});
+	}
 
-    this.submitButton.addEventListener('click', () => {
-      this.submitOrderData();
-    });
+	setActiveButton(activeName: string): void {
+		this.buttons.forEach((button) => {
+			const isActive = button.name === activeName;
+			this.toggleClass(button, 'button_alt-active', isActive);
+		});
+	}
 
-    this.inputs.forEach((input) => {
-      input.addEventListener('input', () => this.toggleSubmitButton());
-    });
+	toggleSubmitButton(): void {
+		this.clearError();
 
-    this.buttons.forEach((button) => {
-      button.addEventListener('click', (event) => {
-        const paymentMethod = (event.target as HTMLButtonElement).name;
-        const paymentLabel = button.textContent || '';
-        this.selectedPaymentMethod = { name: paymentMethod, label: paymentLabel };
-        this.setActiveButton(paymentMethod);
-        this.toggleSubmitButton();
-      });
-    });
-  }
+		if (!this.selectedPaymentMethod) {
+			this.displayError('Выберите способ оплаты');
+			this.setDisabled(this.submitButton, true);
+			return;
+		}
 
-  setActiveButton(activeName: string): void {
-    this.buttons.forEach((button) => {
-      if (button.name === activeName) {
-        button.classList.add('button_alt-active');
-      } else {
-        button.classList.remove('button_alt-active');
-      }
-    });
-  }
+		const inputValues = this.getInputValues(this.inputs);
+		if (!inputValues.address.trim()) {
+			this.displayError('Пожалуйста, введите адрес');
+			this.setDisabled(this.submitButton, true);
+			return;
+		}
 
-  toggleSubmitButton(): void {
-    this.clearError();
+		this.submitButton.disabled = false;
+	}
 
-    if (!this.selectedPaymentMethod) {
-      this.displayError('Выберите способ оплаты');
-      this.submitButton.disabled = true;
-      return;
-    }
+	submitOrderData(): void {
+		const inputValues = this.getInputValues(this.inputs);
+		const address = inputValues.address;
 
-    const inputValues = this.getInputValues(this.inputs);
-    if (!inputValues.address.trim()) {
-      this.displayError('Пожалуйста, введите адрес');
-      this.submitButton.disabled = true;
-      return;
-    }
+		const { name: paymentName, label: paymentLabel } =
+			this.selectedPaymentMethod;
+		this.events.emit('payment-address:submit', {
+			address,
+			paymentMethod: { name: paymentName, label: paymentLabel },
+		});
+		this.events.emit('userInfo:open');
+	}
 
-    this.submitButton.disabled = false;
-  }
-
-  submitOrderData(): void {
-    const inputValues = this.getInputValues(this.inputs);
-    const address = inputValues.address;
-
-    const { name: paymentName, label: paymentLabel } = this.selectedPaymentMethod;
-    this.events.emit('payment-address:submit', {
-      address,
-      paymentMethod: { name: paymentName, label: paymentLabel },
-    });
-    this.events.emit('userInfo:open');
-  }
-
-  close(): void {
-    super.close(this.inputs, () => {
-      this.selectedPaymentMethod = null;
-      this.buttons.forEach((button) => {
-        button.classList.remove('button_alt-active');
-      });
-      this.submitButton.disabled = true;
-    });
-  }
+	close(): void {
+		super.close(this.inputs, () => {
+			this.selectedPaymentMethod = null;
+			this.buttons.forEach((button) => {
+				this.toggleClass(button, 'button_alt-active', false);
+			});
+			this.setDisabled(this.submitButton, true);
+		});
+	}
 }
-

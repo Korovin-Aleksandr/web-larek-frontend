@@ -8,12 +8,12 @@ import { ProductCard } from './components/ProductCard';
 import { AuctionAPI } from './components/AppApi';
 import { ModalContainer } from './components/common/modalContainer';
 import { CardPreviewModal } from './components/common/cardPreviewModal';
-import { BasketModal, basketItem } from './components/common/basketModal';
+import { BasketModal, BasketItem} from './components/common/basketModal';
 import { OrderData } from './components/orderData';
-import { BasketIcon } from './components/common/basketIcon';
 import { UserInfoModal } from './components/common/userInfoModel';
 import { SuccessModal } from './components/common/successModal';
 import { PaymentModal } from './components/common/paymantModal';
+import { Page } from './components/common/page';
 
 
 const events = new EventEmitter();
@@ -21,7 +21,7 @@ const productsData = new ProductData(events);
 const api = new AuctionAPI(CDN_URL, API_URL);
 const modal = new ModalContainer(document.querySelector('#modal-container'), events);
 const orderData = new OrderData(events);
-const basketIcon = new BasketIcon(document.querySelector('.header__container'), events);
+const page = new Page(document.querySelector('.page'), events);
 
 
 //Темплейты
@@ -46,12 +46,11 @@ events.onAll(({ eventName, data }) => {
 api.getLotList()
   .then((products) => {
     productsData.cards = products;
-    const  cardSection = document.querySelector('.gallery');
 
     products.forEach((product) => {
       const clonedTemplate = cloneTemplate(cardListTemplate); 
       const card = new ProductCard(clonedTemplate, events); 
-      cardSection.append(card.render(product)); 
+      page.gallery.append(card.render(product)); 
     });
   })
   .catch((err) => {
@@ -86,7 +85,7 @@ events.on('basket:open', () =>{
   basketModal.renderBasketItems(
     orderData.items,
     basketItemTemplate,
-    basketItem 
+    BasketItem
   );
   modal.modalContent.append(basketModal.render());
   modal.open();
@@ -113,20 +112,22 @@ events.on('basket-item:delete', (data: { id: string }) => {
   basketModal.renderBasketItems(
     orderData.items,
     basketItemTemplate,
-    basketItem 
+    BasketItem
   );
 });
 
 //обновление информации в корзине
 events.on('basket:update', (data: { amount: number, total: number}) => {
-  basketIcon.count = data.amount;
+  page.count = data.amount;
   basketModal.order = data.total;
+  
 });
 
 //открытие модального окна выбора способа оплаты и ввода адреса
 events.on('paymant:open', () => {
   modal.close();
   modal.modalContent.append(paymantModal.render());
+  
   modal.open()
 })
 
@@ -166,7 +167,7 @@ events.on('order:sending', async () => {
     events.emit('basket:update', { amount: 0, total: 0 });
     events.emit('success-modal:open');
   } catch (error) {
-    
+    console.error('Ошибка при отправке данных:', error);
   }
 });
 
